@@ -138,7 +138,8 @@
 			"fb_wifi.h": "c",
 			"*.inc": "cpp",
 			"pthread.h": "c",
-			"ds3231.h": "c"
+			"ds3231.h": "c",
+			"ws2812_control.h": "c"
 		}
 	}
 }

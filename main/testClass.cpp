@@ -21,7 +21,7 @@
 #include "lwip/sys.h"
 #include "lwip/api.h"
 
-#include "nixie_testClass.h"
+#include "testClass.h"
 
 
 int iAGlobalVariable;	// "global" variables work fine, but we want to get away from this concept of using global stuff!
