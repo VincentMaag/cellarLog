@@ -18,6 +18,7 @@
 #define GREEN 0xFF0000
 #define BLUE  0x0000FF
 #define WHITE 0xFFFFFF
+#define NOCOLOR 0x000000
 
 class WS2812
 {
@@ -25,22 +26,18 @@ private:
     /* data */
     rmt_channel_t m_rmtChannel;
     gpio_num_t m_gpio;
-
-    // I think this leads to stack overflows. guess we will have to allocate some memory on the heap and not the stack,
-    // I'm guessing the main app is allocated on the stack too with a certain size (probably defined somewhere in config)
-//    rmt_item32_t m_led_data_buffer[LED_BUFFER_ITEMS] = {};
-
-
-    // setup rmt buffer
+    uint32_t m_nrOfLED;
+    // pointer that will point to our buffer, once initialized
+    uint32_t m_nrOfRmtItems;
+    rmt_item32_t *pm_DataBuffer;
+    // setup rmt buffer. Pass an array of led-colors and how many of those we want to use (can be less than whole array passed)
     esp_err_t loadRmtBuffer(uint32_t* pData_, uint32_t length_);
 
 public:
     WS2812(/* args */);
-    // init RMT channel and assign GPIO
+    // init RMT channel and assign GPIO. Set maximum allowed leds
     esp_err_t initChannel(rmt_channel_t channel_, gpio_num_t gpio_, uint32_t nrOfLED_);
-    
-    
-    // write buffer to rmt output
+    // write data array to rmt output
     esp_err_t writeLEDs(uint32_t* pData_, uint32_t nrOfLEDs_);
 
 };

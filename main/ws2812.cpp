@@ -18,8 +18,6 @@
 // static TAG
 static const char *TAG = "ws2812";
 
-rmt_item32_t m_led_data_buffer[LED_BUFFER_ITEMS];
-
 // =============================================================================================================
 // CLASS WS2812
 // =============================================================================================================
@@ -49,12 +47,21 @@ esp_err_t WS2812::initChannel(rmt_channel_t channel_, gpio_num_t gpio_, uint32_t
 
 	m_rmtChannel = channel_;
 	m_gpio = gpio_;
+	m_nrOfLED = nrOfLED_;
+	m_nrOfRmtItems = nrOfLED_ * BITS_PER_LED_CMD;
+	
+	// allocate memory for the buffer on the heap. Nr of LED * Bits per LED needed. Every bit is an rmt item!
+	pm_DataBuffer = new rmt_item32_t[m_nrOfRmtItems];
 
 	return ESP_OK;
 }
 
 esp_err_t WS2812::loadRmtBuffer(uint32_t *pData_, uint32_t length_)
 {
+	if(length_ > m_nrOfLED){
+		ESP_LOGE(TAG, "Too many LEDs written");
+		return ESP_FAIL;
+	}
 	for (uint32_t led = 0; led < length_; led++)
 	{
 		uint32_t bits_to_send = pData_[led];
@@ -62,7 +69,7 @@ esp_err_t WS2812::loadRmtBuffer(uint32_t *pData_, uint32_t length_)
 		for (uint32_t bit = 0; bit < BITS_PER_LED_CMD; bit++)
 		{
 			uint32_t bit_is_set = bits_to_send & mask;
-			m_led_data_buffer[led * BITS_PER_LED_CMD + bit] = bit_is_set ? (rmt_item32_t){{{T1H, 1, TL, 0}}} : (rmt_item32_t){{{T0H, 1, TL, 0}}};
+			pm_DataBuffer[led * BITS_PER_LED_CMD + bit] = bit_is_set ? (rmt_item32_t){{{T1H, 1, TL, 0}}} : (rmt_item32_t){{{T0H, 1, TL, 0}}};
 			mask >>= 1;
 		}
 	}
@@ -72,7 +79,7 @@ esp_err_t WS2812::loadRmtBuffer(uint32_t *pData_, uint32_t length_)
 esp_err_t WS2812::writeLEDs(uint32_t *pData_, uint32_t nrOfLEDs_)
 {
 	WS2812::loadRmtBuffer(pData_, nrOfLEDs_);
-	ESP_ERROR_CHECK(rmt_write_items(m_rmtChannel, m_led_data_buffer, LED_BUFFER_ITEMS, false));
+	ESP_ERROR_CHECK(rmt_write_items(m_rmtChannel, pm_DataBuffer, m_nrOfRmtItems, false));
 	ESP_ERROR_CHECK(rmt_wait_tx_done(m_rmtChannel, portMAX_DELAY));
 
 	return ESP_OK;
