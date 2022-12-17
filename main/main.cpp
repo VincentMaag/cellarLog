@@ -36,6 +36,7 @@ neopixel project. Todos:
 #include "neopixel_projdefs.h"
 #include "testClass.h"
 #include "ws2812.h"
+#include "uart.h"
 
 static const char *TAG = "main";
 
@@ -95,29 +96,36 @@ extern "C" void app_main()
 
     // =====================================================================
     // LED
-    WS2812 ws2812;
-    ws2812.initChannel(RMT_CHANNEL_0,GPIO_NUM_13,50);
-    uint32_t ui32colors[NUM_LEDS] = {};
-    for (size_t i = 0; i < 50; i++)
-    {
-        /* code */
-        ui32colors[i] = NOCOLOR;
-    }
-    // clear all colors first
-    ws2812.writeLEDs(ui32colors,50);
-    vTaskDelay((1000 / portTICK_PERIOD_MS));
+    // WS2812 ws2812;
+    // ws2812.initChannel(RMT_CHANNEL_0,GPIO_NUM_13,50);
+    // uint32_t ui32colors[NUM_LEDS] = {};
+    // for (size_t i = 0; i < 50; i++)
+    // {
+    //     /* code */
+    //     ui32colors[i] = NOCOLOR;
+    // }
+    // // clear all colors first
+    // ws2812.writeLEDs(ui32colors,50);
+    // vTaskDelay((1000 / portTICK_PERIOD_MS));
     
+    // =====================================================================
+    // UART
+    Uart uart;
+    
+    uart.createEchoTask();
+    
+
 
     // TickType_t previousWakeTime = xTaskGetTickCount();
     while (true)
     {
-        ui32colors[0] = RED;
-        ui32colors[1] = GREEN;
-        ui32colors[2] = BLUE;
-        ui32colors[6] = RED;
-        ui32colors[7] = GREEN;
-        ui32colors[8] = BLUE;
-        ws2812.writeLEDs(ui32colors,9);
+        // ui32colors[0] = RED;
+        // ui32colors[1] = GREEN;
+        // ui32colors[2] = BLUE;
+        // ui32colors[6] = RED;
+        // ui32colors[7] = GREEN;
+        // ui32colors[8] = BLUE;
+        // ws2812.writeLEDs(ui32colors,9);
 
 
         ESP_LOGI(TAG, "Main Looping");
