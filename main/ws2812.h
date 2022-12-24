@@ -18,6 +18,11 @@
 #define GREEN 0xFF0000
 #define BLUE  0x0000FF
 #define WHITE 0xFFFFFF
+#define WARMWHITE_1 0xc0ef70
+#define WARMWHITE_2 0x70e425
+
+//
+
 #define NOCOLOR 0x000000
 
 class WS2812

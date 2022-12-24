@@ -96,12 +96,12 @@ extern "C" void app_main()
     // =====================================================================
     // LED
     WS2812 ws2812;
-    ws2812.initChannel(RMT_CHANNEL_0,GPIO_NUM_13,50);
+    ws2812.initChannel(RMT_CHANNEL_0,GPIO_NUM_13,144);
     uint32_t ui32colors[NUM_LEDS] = {};
-    for (size_t i = 0; i < 50; i++)
+    for (size_t i = 0; i < 144; i++)
     {
         /* code */
-        ui32colors[i] = NOCOLOR;
+        ui32colors[i] = WARMWHITE_1;
     }
     // clear all colors first
     ws2812.writeLEDs(ui32colors,50);
@@ -111,13 +111,16 @@ extern "C" void app_main()
     // TickType_t previousWakeTime = xTaskGetTickCount();
     while (true)
     {
-        ui32colors[0] = RED;
-        ui32colors[1] = GREEN;
-        ui32colors[2] = BLUE;
-        ui32colors[6] = RED;
-        ui32colors[7] = GREEN;
-        ui32colors[8] = BLUE;
-        ws2812.writeLEDs(ui32colors,9);
+        // ui32colors[0] = RED;
+        // ui32colors[1] = GREEN;
+        // ui32colors[2] = BLUE;
+        // ui32colors[6] = RED;
+        // ui32colors[7] = GREEN;
+        // ui32colors[8] = BLUE;
+        // ws2812.writeLEDs(ui32colors,9);
+
+        ws2812.writeLEDs(ui32colors,144);
+
 
 
         ESP_LOGI(TAG, "Main Looping");
