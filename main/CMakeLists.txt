@@ -3,4 +3,5 @@
 idf_component_register(SRCS "main.cpp"
                             "testClass.cpp"
                             "ws2812.cpp"
+                            "si7021.cpp"
                             INCLUDE_DIRS ".")
