@@ -9,14 +9,18 @@
 class Uart
 {
 private:
-    /* data */
-public:
-    Uart(/* args */);
-    ~Uart();
-
-    esp_err_t createEchoTask();
 
     static void uartEchoTask(void *arg);
+
+public:
+
+    // create and setup uart object
+    Uart(gpio_num_t gpio_rx_, gpio_num_t gpio_tx_);
+
+    // create and start uart task
+    esp_err_t createEchoTask();
+
+    
 };
 
 // Uart::Uart(/* args */)
