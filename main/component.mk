@@ -9,4 +9,4 @@
 
 
 # files to add to the web server
-COMPONENT_EMBED_FILES := index/index.html index/index.js index/Chart.js index/index.css
+#COMPONENT_EMBED_FILES := index/index.html index/index.js index/Chart.js index/index.css

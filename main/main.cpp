@@ -24,12 +24,12 @@
 #include "maag_wifi.h"
 #include "maag_gpio.h"
 #include "maag_i2c_port.h"
+#include "maag_spi_host.h"
 
 // project
-#include "neopixel_projdefs.h"
-#include "testClass.h"
-#include "ws2812.h"
+#include "cellarLog_projdefs.h"
 #include "si7021.h"
+#include "sdCard.h"
 
 static const char *TAG = "main";
 
@@ -37,8 +37,6 @@ extern "C" void app_main()
 {
     ESP_LOGI(TAG, "STARTING MAIN");
     // =====================================================================
-    // global initializing, objects, parameters, nvs, etc.
-    //
     ESP_LOGI(TAG, "Initializing nvs");
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
@@ -46,15 +44,13 @@ extern "C" void app_main()
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
-    ESP_ERROR_CHECK(ret);
-
-    // not sure why i added next lines...
+    // ESP_ERROR_CHECK(ret);
     // ESP_LOGI(TAG, "Initializing netif");
     // ESP_ERROR_CHECK(esp_netif_init());
     // ESP_LOGI(TAG, "Initializing event loop");
     // ESP_ERROR_CHECK( esp_event_loop_create_default() );
     // =====================================================================
-    // Wifi object
+    // WIFI
     MaagWifi wifi;
     wifi.setIP("192.168.178.140");
     wifi.setGW("192.168.178.1");
@@ -66,21 +62,36 @@ extern "C" void app_main()
     // wifi.init_sta();
     //wifi.createSTAAutoConnectTask(5000, 0);
     // =====================================================================
-    // create i2c port
-    MaagI2CPort i2c;
-    i2c.initPort(I2C_NUM_0, GPIO_NUM_21, GPIO_NUM_22, I2C_MODE_MASTER);
-    // create and configure si7021 i2c device. Hook to existing port
-    SI7021 si7021(i2c.getPort());
+    // I2C
+    // MaagI2CPort i2c;
+    // i2c.initPort(I2C_NUM_0, GPIO_NUM_21, GPIO_NUM_22, I2C_MODE_MASTER);
+    // SI7021 si7021(i2c.getPort());
+    // SD Card
+    #define MISO GPIO_NUM_19
+    #define MOSI GPIO_NUM_18
+    #define CLK GPIO_NUM_5
+    #define CS GPIO_NUM_21
 
+    SDCard sdcard;
+    //sdcard.okthenfucku();
+    sdcard.init(MISO, MOSI, CLK, CS);
+    // sdcard.mount();
 
+    //MaagSpiHost myHost;
+    //myHost.initHost(SPI2_HOST, MISO, MOSI, CLK);
 
     while (true)
     {
         
-        si7021.getTemp();
+        //si7021.getTemp();
 
+        // ESP_LOGI(TAG, "Temp: %.2f, Humid: %.2f",si7021.getTemp(), si7021.getHumidity());
 
-        ESP_LOGI(TAG, "Main sleeping...");
+        ESP_LOGI(TAG, "Attempting to mount...");
+        sdcard.mount();
+        
+
+        ESP_LOGI(TAG, "Awaiting next loop...");
         vTaskDelay((2000 / portTICK_PERIOD_MS));
     }
 

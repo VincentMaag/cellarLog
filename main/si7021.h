@@ -16,7 +16,8 @@ public:
     SI7021(i2c_port_t port_);
     // get temperature of sensor in °C. Returns 42.42° if something goes wrong
     float getTemp();
-
+    // get humidity of sensor in °C. Returns 24.24° if something goes wrong
+    float getHumidity();
 };
 
 
