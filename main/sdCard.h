@@ -26,32 +26,34 @@ class SDCard
 {
 private:
     
-    
-
-    std::string m_filename;
+    std::string m_filename = "/cellar.csv";
     logData_t m_logData;
 
     esp_vfs_fat_sdmmc_mount_config_t m_mount_config;
     sdmmc_card_t *m_card;
     sdmmc_host_t m_host;
-    spi_bus_config_t m_bus_cfg = {};
-    sdspi_device_config_t m_slot_config;
-    
+    sdmmc_slot_config_t m_slot_config;
+
+    uint8_t m_mountedState;
 
 public:
     SDCard();
 
-    void init(gpio_num_t miso_, gpio_num_t mosi_, gpio_num_t sck_, gpio_num_t cs_);
+    // void init_sdspi(gpio_num_t miso_, gpio_num_t mosi_, gpio_num_t sck_, gpio_num_t cs_);
 
-    esp_err_t mount();
+    // setup sd card in sdmmc mode. For now, Only 1-bit mode and fixed clk frequency is supported. Using sdmmc slot 1
+    esp_err_t mount_sdmmc();
 
-    esp_err_t unmount();
+    esp_err_t unmount_sdmmc();
 
-    void okthenfucku();
+    void log(logData_t newData_);
 
-    // esp_err_t setFileName(std::string filename_);
+    void writeSomething();
 
-    // esp_err_t log(logData_t newData);
+
+    //esp_err_t setFileName(std::string filename_);
+
+    
 
 };
 

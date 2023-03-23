@@ -25,6 +25,7 @@
 #include "maag_gpio.h"
 #include "maag_i2c_port.h"
 #include "maag_spi_host.h"
+#include "maag_sntp.h"
 
 // project
 #include "cellarLog_projdefs.h"
@@ -44,55 +45,63 @@ extern "C" void app_main()
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
-    // ESP_ERROR_CHECK(ret);
-    // ESP_LOGI(TAG, "Initializing netif");
-    // ESP_ERROR_CHECK(esp_netif_init());
-    // ESP_LOGI(TAG, "Initializing event loop");
-    // ESP_ERROR_CHECK( esp_event_loop_create_default() );
     // =====================================================================
     // WIFI
     MaagWifi wifi;
     wifi.setIP("192.168.178.140");
     wifi.setGW("192.168.178.1");
     wifi.setDNS("8.8.8.8");
-    // wifi.setSSID("FRITZ!Box 5490 WT");
-    wifi.setSSID("ladidaaaaa");
-    wifi.setPW("wuesstischwohlgern");
-    wifi.init_ap();
-    // wifi.init_sta();
-    //wifi.createSTAAutoConnectTask(5000, 0);
+    wifi.setSSID("FRITZ!Box 7583 AE 2.4 Ghz");
+    // wifi.setSSID("ladidaaaaa");
+    wifi.setPW("72176317897889201379");
+    // wifi.init_ap();
+    wifi.init_sta();
+    wifi.createSTAAutoConnectTask(5000, 0);
+    // =====================================================================
+    // SNTP (online clock)
+    //
+    MaagSNTP sntp;
+    sntp.setSynchInterval(5 * 60 * 1000);
+	sntp.initStart();
     // =====================================================================
     // I2C
-    // MaagI2CPort i2c;
-    // i2c.initPort(I2C_NUM_0, GPIO_NUM_21, GPIO_NUM_22, I2C_MODE_MASTER);
-    // SI7021 si7021(i2c.getPort());
+    MaagI2CPort i2c;
+    i2c.initPort(I2C_NUM_0, GPIO_NUM_25, GPIO_NUM_26, I2C_MODE_MASTER);
+    SI7021 si7021(i2c.getPort());
+    // =====================================================================
     // SD Card
-    #define MISO GPIO_NUM_19
-    #define MOSI GPIO_NUM_18
-    #define CLK GPIO_NUM_5
-    #define CS GPIO_NUM_21
-
     SDCard sdcard;
-    //sdcard.okthenfucku();
-    sdcard.init(MISO, MOSI, CLK, CS);
-    // sdcard.mount();
+    sdcard.mount_sdmmc(); // 15 = CMD = pin2, 14 = clk = pin5, 2 = D0 = pin7
 
-    //MaagSpiHost myHost;
-    //myHost.initHost(SPI2_HOST, MISO, MOSI, CLK);
+    // set timezone
+    setenv("TZ", "MEZ-1MESZ", 1);
+	tzset();
 
     while (true)
     {
-        
-        //si7021.getTemp();
+        // get local time
+	    time_t now_as_time_t = time(0);
+        struct tm now_as_tm = {};
+		localtime_r(&now_as_time_t, &now_as_tm);
+        // build timestamp string as desired
+        now_as_tm.tm_mon = now_as_tm.tm_mon + 1;
+        now_as_tm.tm_year = now_as_tm.tm_year + 1900;
+        char timestamp[72];
+        sprintf(timestamp, "%i.%i.%i %i:%i:%i", now_as_tm.tm_mday,now_as_tm.tm_mon,now_as_tm.tm_year,now_as_tm.tm_hour,now_as_tm.tm_min,now_as_tm.tm_sec);
 
+        //ESP_LOGI(TAG, "Timestamp: %s",timestamp);
         // ESP_LOGI(TAG, "Temp: %.2f, Humid: %.2f",si7021.getTemp(), si7021.getHumidity());
 
-        ESP_LOGI(TAG, "Attempting to mount...");
-        sdcard.mount();
-        
+        logData_t t;
+        t.timestamp = timestamp;
+        t.value1 = si7021.getTemp();
+        vTaskDelay((100 / portTICK_PERIOD_MS));
+        t.value2 = si7021.getHumidity();
+
+        sdcard.log(t);
 
         ESP_LOGI(TAG, "Awaiting next loop...");
-        vTaskDelay((2000 / portTICK_PERIOD_MS));
+        vTaskDelay((30*1000 / portTICK_PERIOD_MS));
     }
 
     ESP_LOGI(TAG, "FINISHED AND EXITING MAIN");
